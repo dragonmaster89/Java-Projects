@@ -1,0 +1,54 @@
+package server;
+
+public class Server {
+	Kattio io;
+	int[] requests;
+	int nbrRequest;
+	int reqPerServer;
+
+	public static void main(String[] args) {
+		new Server().generateInputOutput();
+
+	}
+
+	public void generateInputOutput() {
+
+		io = new Kattio(System.in);
+
+		nbrRequest = io.getInt();
+		reqPerServer = io.getInt();
+		requests = new int[nbrRequest];
+
+		for (int i = 0; i < nbrRequest; i++) {
+			requests[i] = io.getInt();
+		}
+
+		int maxJobs = 0;
+		for (int j = 0; j < nbrRequest; j++) {
+
+			int jobs = 0;
+			int nextPos = j;
+			int current = requests[j];
+
+			while (requests[nextPos] < (current + 1000)) {  //Counting how many requests (including this request) that will happend during this requests process time
+				jobs++;
+				nextPos++;
+
+				if(nextPos > nbrRequest-1) { //protect from indexOutOfBound
+					break;
+				}
+				if(j + maxJobs >= nbrRequest) { //Skipping steps not giving new information
+					break;
+				}
+			}
+
+			if (jobs > maxJobs) { //saving the maximum jobs running at the same time
+				maxJobs = jobs;
+			}
+		}
+		int serversNeeded = (int) Math.ceil((double) maxJobs /(double) reqPerServer); // Dividing with server capacity and rounding up to next int
+		
+		System.out.println("\n" + serversNeeded);
+	}
+
+}
