@@ -1,0 +1,226 @@
+package LightsOut;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+public class Game {
+
+	Kattio io;
+	boolean[] board;
+	int minClick;
+	ArrayList<Integer> clickCount;
+	ArrayList<boolean[]> boards;
+	boolean[] inputBoard;
+	Map<Integer, boolean[]> map;
+	int[] nbrCellsEqual;
+
+	public static void main(String[] args) {
+		new Game().generateOutput();
+	}
+
+	/**
+	 * Startar inläsningen från system.in med hjälp av Kattio. Första int som
+	 * inläses är antal problem. Skapar en input board för aktuellt problem
+	 * 
+	 * Skickar in input-brädet till solve()
+	 * 
+	 * Ska returna en int, som är minimalt antal klick för att gå från tomt bräde
+	 * till input-brädet
+	 * 
+	 */
+	public void generateOutput() {
+
+		io = new Kattio(System.in);
+
+		int nbrProb = io.getInt();
+
+		for (int i = 0; i < nbrProb; i++) {
+			inputBoard = new boolean[9];
+			inputBoard = generateInput(inputBoard);
+			System.out.println("Input");
+			for (int p = 0; p < 9; p++) {
+				System.out.println(inputBoard[p]);
+			}
+			System.out.println(" ");// generateInput fortsätter inläsningen
+			minClick = 999;
+//			if( solve(inputBoard)) {
+//				System.out.print(minClick);
+//			}
+			// aternativt
+			solve(inputBoard);
+			System.out.print(minClick);
+
+		}
+	}
+
+	/**
+	 * Ska solva från ett tomt bräde till input brädet på minimalt antal klick
+	 * 
+	 * @param inputBoard
+	 * @return true om löst. TVEKSAM på vad retur typen ska vara här, då det kommer
+	 *         vara flera lösningar och för varje lösning ska det lagras antal
+	 *         "klick" att ta sig till lösningen
+	 */
+
+	public boolean solve(boolean[] inputBoard) {
+
+		return solve(inputBoard, new boolean[9], 0);
+	}
+
+	private boolean solve(boolean[] inputboard, boolean[] boardToSolve, int counter) {
+
+//		if (inputBoard == boardToSolve) {
+			if(Arrays.equals(inputboard, boardToSolve) ) {  //|| counter > 20
+			minClick = counter;
+			return true;
+
+		}
+			if(counter >10) {
+				return false;
+			}
+			
+			System.out.println("Input-solve");
+			for(int p=0; p<9; p++) {
+				System.out.println(inputBoard[p]);
+				
+			}
+			System.out.println(" ");
+			
+
+		boards = new ArrayList<boolean []>();
+		int [] nbrCellsEqual = new int[9];
+
+		for (int i = 0; i < 9; i++) { // Skapar ett nytt bräde för varje olika klick , i blir key och nya brädet value
+			boolean[] nextBoard = new boolean[9];
+			nextBoard = flip(boardToSolve, i);
+			boards.add(i, nextBoard);
+			for (int j = 0; j < 9; j++) {
+				if (boards.get(i)[j] == true && inputboard[j] == true) {   //kollar om det är lika värde
+					nbrCellsEqual[i] += 1; // index i nbrCellsEqual motsvarar key i för bästa brädet
+				}		
+		}
+			
+			System.out.println(nbrCellsEqual[i]);
+		}
+
+		int max = nbrCellsEqual[0];
+		int indexBestOption = 0;
+		int indexSecondBestOption = 0;
+
+		for (int k = 0; k < nbrCellsEqual.length; k++) {
+
+			if (max < nbrCellsEqual[k]) {
+				max = nbrCellsEqual[k];
+				indexSecondBestOption = indexBestOption;
+				indexBestOption = k;
+			}
+		}
+
+		boolean [] nextBoard = boards.get(indexBestOption);
+		boolean [] nextBoardAlternative = boards.get(indexSecondBestOption);
+		
+		System.out.println("flipped" + counter);
+		for(int h=0; h<9; h++) {
+			System.out.println(nextBoard[h]);
+		}
+		System.out.println(" ");
+
+		if (solve(inputBoard, nextBoard, counter + 1)) { // Skickar vidare bästa brädet
+			return true; // om nästa ger true,
+		}
+		
+		else if(solve(inputBoard, nextBoardAlternative, counter +1 )) {
+		//	boardToSolve = nextBoardAlternative;
+			return true;
+		}
+		
+		return false;
+//		
+	}
+
+	public boolean[] generateInput(boolean[] inputBoard) {
+		for (int i = 0; i < 3; i++) {
+			String s = io.getWord();
+
+			for (int j = 0; j < 3; j++) {
+				if (s.charAt(j) == '.')
+					inputBoard[3 * i + j] = false;
+				else
+					inputBoard[3 * i + j] = true;
+			}
+		}
+		return inputBoard;
+	}
+
+	/**
+	 * 
+	 * @param      prevBoard, tar in brädet och flippar aktuell cell, samt
+	 *             närliggande enligt regler
+	 * @param cell
+	 * @return nytt bräde med ändrade värden
+	 */
+	public boolean[] flip(boolean[] prevBoard, int cell) {
+		boolean[] nextBoard = new boolean[9];
+
+		if (cell == 0) {
+			nextBoard[0] = flipCell(prevBoard[0]);
+			nextBoard[1] = flipCell(prevBoard[1]);
+			nextBoard[3] = flipCell(prevBoard[3]);
+		} else if (cell == 1) {
+			nextBoard[0] = flipCell(prevBoard[0]);
+			nextBoard[1] = flipCell(prevBoard[1]);
+			nextBoard[2] = flipCell(prevBoard[2]);
+			nextBoard[4] = flipCell(prevBoard[4]);
+		} else if (cell == 2) {
+			nextBoard[2] = flipCell(prevBoard[2]);
+			nextBoard[1] = flipCell(prevBoard[1]);
+			nextBoard[5] = flipCell(prevBoard[5]);
+		} else if (cell == 3) {
+			nextBoard[3] = flipCell(prevBoard[3]);
+			nextBoard[0] = flipCell(prevBoard[0]);
+			nextBoard[4] = flipCell(prevBoard[4]);
+			nextBoard[6] = flipCell(prevBoard[6]);
+		} else if (cell == 4) {
+			nextBoard[4] = flipCell(prevBoard[4]);
+			nextBoard[1] = flipCell(prevBoard[1]);
+			nextBoard[5] = flipCell(prevBoard[5]);
+			nextBoard[7] = flipCell(prevBoard[7]);
+			nextBoard[3] = flipCell(prevBoard[3]);
+		} else if (cell == 5) {
+			nextBoard[5] = flipCell(prevBoard[5]);
+			nextBoard[2] = flipCell(prevBoard[2]);
+			nextBoard[8] = flipCell(prevBoard[8]);
+			nextBoard[4] = flipCell(prevBoard[4]);
+		} else if (cell == 6) {
+			nextBoard[6] = flipCell(prevBoard[6]);
+			nextBoard[3] = flipCell(prevBoard[3]);
+			nextBoard[7] = flipCell(prevBoard[7]);
+		} else if (cell == 7) {
+			nextBoard[7] = flipCell(prevBoard[7]);
+			nextBoard[6] = flipCell(prevBoard[6]);
+			nextBoard[4] = flipCell(prevBoard[4]);
+			nextBoard[8] = flipCell(prevBoard[8]);
+		} else {
+			nextBoard[8] = flipCell(prevBoard[8]);
+			nextBoard[7] = flipCell(prevBoard[7]);
+			nextBoard[5] = flipCell(prevBoard[5]);
+		}
+		return nextBoard;
+	}
+
+	/**
+	 * 
+	 * @param byter värde på aktuell cell
+	 * @return
+	 */
+	public boolean flipCell(boolean cell) {
+//
+		return !cell;
+	}
+
+}
