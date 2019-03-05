@@ -1,0 +1,154 @@
+package BuildingFence;
+import java.util.PriorityQueue;
+
+public class BuildingFence {
+Kattio io;
+int nbrTrees;
+int nbrPoles;
+Pole [] poles;
+PriorityQueue<Tree> treeQue;
+PriorityQueue<Tree> treeQueMeter;
+Tree t;
+
+public static void main(String[] args) {
+	
+	new BuildingFence().generateInput();
+	
+
+	
+//	Tree tree1 = new Tree(5,5,1.0);
+//	System.out.println(tree1.toString());
+}
+	
+public void generateInput() {
+	
+	io = new Kattio(System.in);
+	
+	nbrTrees = io.getInt();
+	nbrPoles = io.getInt();
+
+	PriorityQueue<Tree> treeQue = new PriorityQueue<Tree>(nbrTrees, new RatioComparator());
+	
+	for(int i=0; i<nbrTrees; i++) {
+		int meter = io.getInt();
+		int time = io.getInt();
+		double ratio = (double) meter/ (double) time;
+		treeQue.add(new Tree(meter,time,ratio));
+	}
+	
+	poles = new Pole [nbrPoles];
+	for(int j=0; j<nbrPoles; j++) {
+		double x = (double) io.getInt();
+		double y = (double) io.getInt();
+		poles[j] = new Pole(x,y);
+		
+	}
+
+	minTimeToBuild(poles, treeQue);
+	
+}
+
+public void minTimeToBuild(Pole [] poles ,PriorityQueue<Tree> treeQue ) {
+	double length = lengthOfFence(poles);
+	System.out.println(length);
+	int sum = 0;
+	int time = 0;
+	PriorityQueue<Tree> treeQueMeter = new PriorityQueue<Tree>(nbrTrees, new MeterComparator());
+	while(sum < length) {
+
+		Tree t = treeQue.poll();
+		sum += t.meter;
+		time += t.time;
+		System.out.println(t.toString());
+		treeQueMeter.add(t);	
+		
+	}
+	
+	sum = 0;
+	time = 0;
+	
+	while(sum < length ) {
+		if(treeQueMeter.isEmpty()) {
+		t = treeQue.poll();
+		sum += t.meter;
+		time += t.time;
+		}
+		else {
+		t = treeQueMeter.poll();
+		sum += t.meter;
+		time += t.time;
+	}
+	System.out.println(t.toString());
+	
+	}	
+	System.out.println(time);
+}
+	
+public boolean timeToBuild() {
+	double length = lengthOfFence(poles);
+	return timeToBuild(length, treeQue, 0,0);
+}
+
+private boolean timeToBuild(double length , PriorityQueue<Tree> treeQue, int time, double sumTreeLength) {
+	
+	if(length <= sumTreeLength && sumTreeLength < length +1) {
+		
+		return true;
+	}
+	if(sumTreeLength >= length +1) {
+		return false;
+	}
+	Tree t = treeQue.poll();
+	sumTreeLength += t.meter;
+	time += t.time;
+	if(timeToBuild(length , treeQue, time, sumTreeLength)) {
+		return true;
+	}
+	else {
+		sumTreeLength -= t.meter;
+		time += t.time;
+		t = new Tree(t.meter, t.time, t.ratio * 1.25);
+		treeQue.add(t);
+		//timeToBuild(length , treeQue, time, sumTreeLength);
+		
+	}
+	return false;
+}
+
+//	System.out.println(treeQue.poll().toString());
+//	System.out.println(treeQue.poll().toString());
+//	System.out.println(treeQue.poll().toString());
+//	
+//	io.flush();
+//	io.close();
+	
+public double lengthOfFence(Pole [] poles) {
+	
+	double sum = 0;
+	Pole p1;
+	Pole p2;
+	
+	for(int i=0; i<nbrPoles; i++) {
+		p1 = poles[i];
+		if(i == nbrPoles-1) {			
+			p2 = poles[0];		
+		}		
+		else {
+		p2 = poles[i+1];
+		}
+
+		double side1 = p2.getX() - p1.getX();
+		double side2 = p2.getY() - p1.getY();
+				
+		sum += Math.sqrt(Math.pow(side1, 2) + Math.pow(side2, 2));
+		
+	}
+	
+	return sum;
+	
+	
+}
+
+	
+
+}
