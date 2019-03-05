@@ -1,0 +1,62 @@
+package election;
+
+public class Election {
+	int [] result;
+	int totVotes;
+	Kattio io;
+	
+	public static void main(String[] args) {
+		new Election().generateInputOutput();
+	}
+	
+	public void generateInputOutput() {
+		
+		io = new Kattio(System.in);
+
+		int nbrCases = io.getInt();
+		
+		for(int i=0; i<nbrCases; i++) {
+			
+			int candidates = io.getInt();
+			result = new int [candidates];
+			totVotes = 0;
+			for(int c =0; c<candidates; c++) {
+				
+				result[c] = io.getInt();
+				totVotes += result[c];	
+			}
+			
+			pickAWinner(result);		
+		}		
+	}
+	
+	
+	public void pickAWinner(int [] res) {
+		 
+        int winner = 0; 
+        int second = 0;
+        int indexWinner = 0;
+        
+        for (int i = 0; i < res.length; i++) {
+            if (res[i] >= winner) {
+            	second = winner;
+                winner = res[i];
+                indexWinner = i;
+            }
+        }
+        
+        if(winner == second) {
+        	System.out.println("no winner");
+      
+    }
+        else if(winner > totVotes/2) {
+        	System.out.println("majority winner " + (indexWinner+1));
+        }
+		
+		
+        else {
+        	System.out.println("minority winner " + (indexWinner+1)) ;
+        }
+	}
+	
+}
